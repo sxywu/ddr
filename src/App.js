@@ -1,18 +1,26 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import _ from 'lodash';
 import './App.css';
 
+// data
+import allSongs from './data/songs.json';
+var songKeys = _.keys(allSongs);
+
+import Visualization from './Visualization';
+
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {songKey: songKeys[_.random(songKeys.length)]};
+  }
+
+  componentWillMount() {
+  }
+
   render() {
     return (
       <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+        <Visualization data={allSongs[this.state.songKey]} />
       </div>
     );
   }
