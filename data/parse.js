@@ -2,12 +2,14 @@ var fs = require('fs');
 var _ = require('lodash');
 
 var stepKeys = {
-  2: 'U',
+  1: 'D+L',
+  2: 'D',
+  3: 'D+R',
   4: 'L',
   6: 'R',
-  8: 'D',
-  7: 7,
-  9: 9,
+  8: 'U',
+  7: 'U+L',
+  9: 'U+R',
 };
 var songs = {};
 var prevSteps = {};
