@@ -1,128 +1,117 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
 import * as d3 from 'd3';
-import chroma from 'chroma-js';
 
-var staffColor = '#ffffff';
+var staffColor = '#ececec';
 var colors = d3.scaleOrdinal()
   .domain(['U', 'L', 'D', 'R'])
-  .range(['#e85151', '#f19b6f', '#53cf8d', '#6298e8']);
+  // .range(['#e85151', '#f19b6f', '#53cf8d', '#6298e8']);
+  .range([
+    [232, 81, 81],
+    [241, 155, 111],
+    [83, 207, 141],
+    [98, 152, 232]
+  ])
 var dotSize = 5;
-var perRow = 160;
-var perColumn = 32;
+var diffSize = {Basic: 2.25 * dotSize, Trick: 1.5 * dotSize, Maniac: 0.75 * dotSize};
 var margin = {top: 20, left: 20};
+var sf = 2;
 
 // verify Flash in the Night, Do You Remember Me, Candy, Exotic Ethnic
 class Visualization extends Component {
   componentDidMount() {
-    this.container = d3.select(this.refs.container);
+    // make canvas crispy
+    this.crispyCanvas(this.refs.dots, 'dots');
+    this.crispyCanvas(this.refs.spiral, 'spiral');
 
     var levels = _.chain(this.props.data.levels)
-      .filter(level => level.mode === 'Single' || level.mode === 'Double')
-      .sortBy(level => (level.mode === 'Single' ? '0' : '1') + level.difficulty[0])
+      .filter(level => level.mode === 'Single')
+      // .filter(level => level.mode === 'Single' || level.mode === 'Double')
+      // .sortBy(level => (level.mode === 'Single' ? '0' : '1') + level.difficulty[0])
       .value();
-    this.renderStaff(levels);
     this.renderSteps(levels);
   }
 
-  renderStaff(levels) {
-    var totalGroups = _.chain(levels)
-      .map(level => _.last(level.steps)[0]) // get very last count for each level
-      .max().value();
-    totalGroups = Math.ceil(totalGroups / perRow);
-    var width = perRow * dotSize + 2 * margin.left;
-    var height = 3 * (levels.length + 1) * dotSize * totalGroups + 2 * margin.top;
-    this.container.attr('width', width)
-      .attr('height', height);
-
-    // rows should be the number of levels
-    // column should be perRow divided by 32
-    var rows = _.times(levels.length, i => i * 3 * dotSize);
-    var columns = _.times(perRow / perColumn + 1, i => i * dotSize * perColumn);
-    var staffs = _.times(totalGroups, i => i * 3 * (levels.length + 1) * dotSize);
-
-    this.staffs = this.container.append('g')
-      .attr('transform', 'translate(' + [margin.left, margin.top] + ')')
-      .selectAll('.staff')
-      .data(staffs).enter().append('g')
-        .classed('staff', true)
-        .attr('stroke', staffColor)
-        .attr('opacity', 0.15)
-        .attr('stroke-width', 0.5)
-        .attr('transform', d => 'translate(' + [0, d] + ')');
-
-    this.staffs.selectAll('.row')
-      .data(rows).enter().append('line')
-      .classed('row', true)
-      .attr('x2', width - 2 * margin.left)
-      .attr('y1', d => d)
-      .attr('y2', d => d);
-
-    this.staffs.selectAll('.column')
-      .data(columns).enter().append('line')
-      .classed('column', true)
-      .attr('x1', d => d)
-      .attr('x2', d => d)
-      .attr('y2', 3 * (levels.length - 1) * dotSize);
+  crispyCanvas(canvas, name) {
+    canvas.width = this.props.width * sf;
+    canvas.height = this.props.height * sf;
+    canvas.style.width = this.props.width + 'px';
+    canvas.style.height = this.props.height + 'px';
+    this[name] = canvas.getContext('2d');
+    this[name].scale(sf, sf);
   }
 
   renderSteps(levels) {
+    var startConstant = 0;
+    var growth = 2.5;
+    var resolution = 0.02;
 
-    this.levels = this.container.append('g')
-      .attr('transform', 'translate(' + [margin.left, margin.top] + ')')
-      .selectAll('.level').data(levels)
-      .enter().append('g')
-      .classed('level', true)
-      // shift it down depending on index
-      .attr('transform', (d, i) => 'translate(' + [0, i * 3 * dotSize] + ')');
+    // total arc length thus far
+    var totalDistance = 0;
+    var centerX = this.props.width / 2;
+    var centerY = this.props.height / 2;
+    var prevX = centerX;
+    var prevY = centerY;
 
-    this.steps = this.levels.selectAll('.step')
-      .data(d => d.steps)
-      .enter().append('g')
-      .classed('step', true)
-      .attr('transform', d => {
-        var x = (d[0] % perRow + 1) * dotSize;
-        var y = Math.floor(d[0] / perRow) * 3 * (levels.length + 1) * dotSize;
+    // for each level, remember the index of the step we're on
+    var dataIndices = _.times(levels.length, () => 0);
 
-        return 'translate(' + [x, y] + ')';
+    this.dots.clearRect(0, 0, this.props.width, this.props.height);
+    this.dots.moveTo(centerX, centerY);
+    this.dots.globalCompositeOperation = 'overlay';
+    this.spiral.clearRect(0, 0, this.props.width, this.props.height);
+    this.spiral.moveTo(centerX, centerY);
+    this.spiral.beginPath();
+    console.log(levels)
+
+    // while even one of the levels have steps left
+    var i = 0;
+    while (_.some(dataIndices, (d, i) => levels[i].steps[d])) {
+    // _.times(10000, i => {
+      var angle = i * resolution;
+      var x = centerX + (startConstant + growth * angle) * Math.cos(angle);
+      var y = centerY + (startConstant + growth * angle) * Math.sin(angle);
+
+      this.spiral.lineTo(x, y);
+
+      var distance = Math.sqrt(Math.pow(prevX - x, 2) + Math.pow(prevY - y, 2));
+      totalDistance += distance;
+
+      _.each(levels, (level, i) => {
+        var step = level.steps[dataIndices[i]];
+
+        if (step && totalDistance >= step[0] * dotSize) {
+          // if total distance has passed that particular step
+          // draw it and increment the index for that level
+          this.dots.beginPath();
+          this.dots.fillStyle = 'rgba(' + colors(step[1][0]) + ',0.75)';
+          this.dots.arc(x, y, diffSize[level.difficulty] / 2, 0, 2 * Math.PI, false);
+          this.dots.fill();
+
+          dataIndices[i] += 1;
+        }
       });
 
-    this.steps.selectAll('circle')
-      .data(d => {
-        var steps = [];
+      prevX = x;
+      prevY = y;
 
-        var i = 0;
-        _.each(d[1], step => {
-          if (step === '') return;
+      i += 1;
+    }
 
-          steps.push({
-            y: i * dotSize / 2,
-            fill: colors(step),
-          });
-          i += 2;
-        });
-        _.each(d[2], step => {
-          if (step === '') return;
-
-          steps.push({
-            y: i * dotSize / 2,
-            fill: chroma(colors(step)).brighten(),
-          });
-          i += 2;
-        });
-
-        return steps;
-      }).enter().append('circle')
-      .attr('cy', d => d.y)
-      .attr('r', dotSize / 2)
-      .attr('fill', d => d.fill);
+    this.spiral.strokeStyle = staffColor;
+    this.spiral.stroke();
   }
 
   render() {
+    var canvasStyle = {
+      position: 'absolute',
+      left: 0,
+    };
 
     return (
-      <div className="Visualization">
-        <svg ref='container' />
+      <div style={{position: 'relative'}}>
+        <canvas ref='spiral' style={canvasStyle} />
+        <canvas ref='dots' style={canvasStyle} />
       </div>
     );
   }
