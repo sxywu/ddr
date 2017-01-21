@@ -7,13 +7,17 @@ var colors = d3.scaleOrdinal()
   .domain(['U', 'L', 'D', 'R'])
   // .range(['#e85151', '#f19b6f', '#53cf8d', '#6298e8']);
   .range([
-    [232, 81, 81],
-    [241, 155, 111],
-    [83, 207, 141],
-    [98, 152, 232]
-  ])
-var dotSize = 5;
-var diffSize = {Basic: 2.25 * dotSize, Trick: 1.5 * dotSize, Maniac: 0.75 * dotSize};
+    [232,81,120],
+    [247,232,131],
+    [98,152,232],
+    [83,207,141],
+    // [232, 81, 81],
+    // [241, 155, 111],
+    // [83, 207, 141],
+    // [98, 152, 232]
+  ]);
+var dotSize = 3;
+var diffSize = {Basic: 3 * dotSize, Trick: 2 * dotSize, Maniac: 1 * dotSize};
 var margin = {top: 20, left: 20};
 var sf = 2;
 
@@ -27,7 +31,8 @@ class Visualization extends Component {
     var levels = _.chain(this.props.data.levels)
       .filter(level => level.mode === 'Single')
       // .filter(level => level.mode === 'Single' || level.mode === 'Double')
-      // .sortBy(level => (level.mode === 'Single' ? '0' : '1') + level.difficulty[0])
+      .sortBy(level => level.difficulty === 'Basic' ? 0 :
+        level.difficulty === 'Trick' ? 1 : 2)
       .value();
     this.renderSteps(levels);
   }
@@ -62,8 +67,6 @@ class Visualization extends Component {
     this.spiral.clearRect(0, 0, this.props.width, this.props.height);
     this.spiral.moveTo(centerX, centerY);
     this.spiral.beginPath();
-    console.log(levels)
-
     // while even one of the levels have steps left
     var i = 0;
     while (_.some(dataIndices, (d, i) => levels[i].steps[d])) {
@@ -103,14 +106,18 @@ class Visualization extends Component {
   }
 
   render() {
+    var style = {
+      position: 'relative',
+      display: 'inline-block',
+    };
     var canvasStyle = {
       position: 'absolute',
       left: 0,
     };
 
     return (
-      <div style={{position: 'relative'}}>
-        <canvas ref='spiral' style={canvasStyle} />
+      <div style={style}>
+        <canvas ref='spiral' />
         <canvas ref='dots' style={canvasStyle} />
       </div>
     );
