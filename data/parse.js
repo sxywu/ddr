@@ -15,8 +15,6 @@ var songs = JSON.parse(fs.readFileSync('./songs.json', 'utf-8') || '{}');
 var stepfiles = _.filter(fs.readdirSync('../stepfiles/stp'), d => _.includes(d, '.stp'));
 
 _.each(stepfiles, stepfile => {
-  // if file has already been parsed, skip
-  if (songs[stepfile]) return;
   console.log('\n', '\n', stepfile);
 
   var song = songs[stepfile] = {filename: stepfile, levels: []};
