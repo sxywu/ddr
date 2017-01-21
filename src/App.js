@@ -18,9 +18,14 @@ class App extends Component {
   }
 
   render() {
+    var vizStyle = {
+      width: 400,
+      height: 400,
+    };
+
     return (
       <div className="App">
-        <Visualization data={allSongs[this.state.songKey]} />
+        <Visualization {...vizStyle} data={allSongs[this.state.songKey]} />
       </div>
     );
   }
