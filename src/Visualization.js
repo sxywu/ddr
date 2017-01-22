@@ -1,21 +1,7 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
-import * as d3 from 'd3';
 
 var staffColor = '#ececec';
-var colors = d3.scaleOrdinal()
-  .domain(['U', 'L', 'D', 'R'])
-  // .range(['#e85151', '#f19b6f', '#53cf8d', '#6298e8']);
-  .range([
-    [232,81,120],
-    [244,180,121],
-    [98,152,232],
-    [83,207,141],
-    // [232, 81, 81],
-    // [241, 155, 111],
-    // [83, 207, 141],
-    // [98, 152, 232]
-  ]);
 var dotSize = 3;
 var diffSize = {Basic: 3 * dotSize, Trick: 2 * dotSize, Maniac: 1 * dotSize};
 var margin = {top: 20, left: 20};
@@ -28,13 +14,7 @@ class Visualization extends Component {
     this.crispyCanvas(this.refs.dots, 'dots');
     this.crispyCanvas(this.refs.spiral, 'spiral');
 
-    var levels = _.chain(this.props.data.levels)
-      .filter(level => level.mode === 'Single')
-      // .filter(level => level.mode === 'Single' || level.mode === 'Double')
-      .sortBy(level => level.difficulty === 'Basic' ? 0 :
-        level.difficulty === 'Trick' ? 1 : 2)
-      .value();
-    this.renderSteps(levels);
+    this.renderSteps(this.props.data);
   }
 
   crispyCanvas(canvas, name) {
@@ -46,6 +26,12 @@ class Visualization extends Component {
     this[name].scale(sf, sf);
   }
 
+  shouldComponentUpdate(nextProps) {
+    this.renderSteps(nextProps.data);
+
+    return false;
+  }
+  
   renderSteps(levels) {
     var growth = 2.5;
     var resolution = 0.02;
@@ -85,7 +71,7 @@ class Visualization extends Component {
           // if total distance has passed that particular step
           // draw it and increment the index for that level
           this.dots.beginPath();
-          this.dots.fillStyle = 'rgba(' + colors(step[1][0]) + ',0.75)';
+          this.dots.fillStyle = 'rgba(' + this.props.colors(step[1][0]) + ',0.75)';
           this.dots.arc(x, y, diffSize[level.difficulty] / 2, 0, 2 * Math.PI, false);
           this.dots.fill();
 
