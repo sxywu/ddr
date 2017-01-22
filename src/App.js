@@ -6,7 +6,7 @@ import './App.css';
 import allSongs from './data/songs.json';
 var songKeys = _.keys(allSongs);
 
-import Visualization from './Visualization';
+import Song from './Song';
 
 class App extends Component {
   constructor(props) {
@@ -18,14 +18,12 @@ class App extends Component {
   }
 
   render() {
-    var vizStyle = {
-      width: 400,
-      height: 400,
-    };
-
+    var songs = _.map(allSongs, data => {
+      return (<Song data={data} />);
+    });
     return (
       <div className="App">
-        <Visualization {...vizStyle} data={allSongs[this.state.songKey]} />
+        {songs}
       </div>
     );
   }
