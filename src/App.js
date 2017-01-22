@@ -2,10 +2,6 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import './App.css';
 
-// data
-import allSongs from './data/songs.json';
-var songKeys = _.keys(allSongs);
-
 import Song from './Song';
 
 class App extends Component {
@@ -15,6 +11,9 @@ class App extends Component {
   }
 
   componentWillMount() {
+    d3.json(process.env.PUBLIC_URL + 'songs.json', songs => {
+      this.setState({songs});
+    });
   }
 
   render() {
