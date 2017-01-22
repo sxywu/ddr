@@ -8,7 +8,7 @@ var colors = d3.scaleOrdinal()
   // .range(['#e85151', '#f19b6f', '#53cf8d', '#6298e8']);
   .range([
     [232,81,120],
-    [247,232,131],
+    [244,180,121],
     [98,152,232],
     [83,207,141],
     // [232, 81, 81],
@@ -47,7 +47,6 @@ class Visualization extends Component {
   }
 
   renderSteps(levels) {
-    var startConstant = 0;
     var growth = 2.5;
     var resolution = 0.02;
 
@@ -68,12 +67,11 @@ class Visualization extends Component {
     this.spiral.moveTo(centerX, centerY);
     this.spiral.beginPath();
     // while even one of the levels have steps left
-    var i = 0;
+    var angle = 0;
     while (_.some(dataIndices, (d, i) => levels[i].steps[d])) {
-    // _.times(10000, i => {
-      var angle = i * resolution;
-      var x = centerX + (startConstant + growth * angle) * Math.cos(angle);
-      var y = centerY + (startConstant + growth * angle) * Math.sin(angle);
+      angle += (resolution * .9);
+      var x = centerX + growth * angle * Math.cos(angle);
+      var y = centerY + growth * angle * Math.sin(angle);
 
       this.spiral.lineTo(x, y);
 
@@ -97,8 +95,6 @@ class Visualization extends Component {
 
       prevX = x;
       prevY = y;
-
-      i += 1;
     }
 
     this.spiral.strokeStyle = staffColor;
@@ -108,7 +104,6 @@ class Visualization extends Component {
   render() {
     var style = {
       position: 'relative',
-      display: 'inline-block',
     };
     var canvasStyle = {
       position: 'absolute',
