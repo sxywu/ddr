@@ -35,25 +35,10 @@ class Song extends Component {
     this.setState({directions});
   }
 
-  render() {
-    var style = {
-      display: 'inline-block',
-      margin: 10,
-      padding: 20,
-      boxShadow: '0 0 15px #ccc',
-      verticalAlign: 'top',
-    };
-    var headerStyle = {
-      width: 250,
-      margin: 'auto',
-    };
-    var vizStyle = {
-      width: 350,
-      height: 350,
-    };
 
+  renderArrows() {
     var size = 14;
-    var arrows = _.map([['←', 'L'], ['↑', 'U'], ['→', 'R'], ['↓', 'D']], data => {
+    return _.map([['←', 'L'], ['↑', 'U'], ['→', 'R'], ['↓', 'D']], data => {
       var [arrow, direction] = data;
       var includes = _.includes(this.state.directions, direction);
       var color = 'rgb(' + this.props.colors(direction) + ')';
@@ -79,6 +64,24 @@ class Song extends Component {
         </span>
       );
     });
+  }
+
+  render() {
+    var style = {
+      display: 'inline-block',
+      margin: 10,
+      padding: 20,
+      boxShadow: '0 0 15px #ccc',
+      verticalAlign: 'top',
+    };
+    var headerStyle = {
+      width: 250,
+      margin: 'auto',
+    };
+    var vizStyle = {
+      width: 350,
+      height: 350,
+    };
 
     var levels = _.map(this.state.levels, level => {
       return Object.assign({}, level, {
@@ -93,7 +96,7 @@ class Song extends Component {
           <p>{this.props.data.artist}</p>
         </div>
         <div>
-          {arrows}
+          {this.renderArrows()}
         </div>
         <Visualization {...vizStyle} {...this.props} data={levels} />
       </div>
