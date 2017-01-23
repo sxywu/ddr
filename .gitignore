@@ -2,3 +2,5 @@
 stepfiles/*
 
 node_modules/*
+
+build/*
