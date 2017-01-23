@@ -45,49 +45,57 @@ class Song extends Component {
     this.setState({difficulties});
   }
 
-  renderArrows() {
+  renderArrows(levels) {
     var size = 12;
     return _.map([['←', 'L'], ['↑', 'U'], ['→', 'R'], ['↓', 'D']], data => {
       var [arrow, direction] = data;
       var includes = _.includes(this.state.directions, direction);
       var color = 'rgb(' + this.props.colors(direction) + ')';
+      var count = _.reduce(levels, (sum, level) => {
+        return sum + (_.countBy(level.steps, step => step[1][0])[direction] || 0);
+      }, 0);
 
       var style = {
+        padding: 5,
+        fontSize: 10,
+        verticalAlign: 'middle',
+        cursor: 'pointer',
+      };
+      var dotStyle = {
         display: 'inline-block',
         width: size,
         height: size,
         borderRadius: size,
         backgroundColor: includes ? color : '#fff',
         color: includes? '#fff' : color,
-        fontWeight: 800,
         fontSize: size * 0.75,
-        verticalAlign: 'top',
+        fontWeight: 800,
         padding: 5,
         margin: 5,
-        cursor: 'pointer',
       };
       return (
-        <span className='header' style={style}
+        <span className='tnum lnum' style={style}
           onClick={this.filterDirection.bind(this, direction)}>
-          {arrow}
+          <span className='header' style={dotStyle}>{arrow}</span>
+          {count}
         </span>
       );
     });
   }
 
-  renderDifficulties() {
+  renderDifficulties(levels) {
     var size = 12;
     var dotSize = 3;
     return _.map([['3', 'Basic'], ['2', 'Trick'], ['1', 'Maniac']], data => {
       var [multiple, difficulty] = data;
       var includes = _.includes(this.state.difficulties, difficulty);
       var color = '#999';
+      var count = _.find(levels, level => level.difficulty === difficulty);
+      count = count ? count.steps.length : 0;
 
       var style = {
-        fontWeight: 800,
-        fontSize: size,
+        fontSize: 10,
         padding: 5,
-        margin: 5,
         cursor: 'pointer',
       };
       var dotStyle = {
@@ -101,11 +109,16 @@ class Song extends Component {
         border: includes? 'none' : '2px solid' + color,
         margin: 5,
       };
+      var headerStyle = {
+        fontWeight: 800,
+        fontSize: size,
+      };
       return (
-        <span className='header' style={style}
+        <span className='tnum lnum' style={style}
           onClick={this.filterDifficulty.bind(this, difficulty)}>
           <span style={dotStyle} />
-          {difficulty}
+          <span className='header' style={headerStyle}>{difficulty} </span>
+          {count}
         </span>
       );
     });
@@ -120,7 +133,7 @@ class Song extends Component {
       verticalAlign: 'top',
     };
     var headerStyle = {
-      width: 250,
+      width: 300,
       margin: 'auto',
     };
     var vizStyle = {
@@ -141,8 +154,8 @@ class Song extends Component {
         <div style={headerStyle}>
           <h3>{this.props.data.name}</h3>
           <p>{this.props.data.artist}</p>
-          <p>{this.renderArrows()}</p>
-          <p>{this.renderDifficulties()}</p>
+          <p>{this.renderArrows(levels)}</p>
+          <p>{this.renderDifficulties(levels)}</p>
         </div>
         <Visualization {...vizStyle} {...this.props} data={levels} />
       </div>
