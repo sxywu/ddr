@@ -30,6 +30,7 @@ class App extends Component {
 
   componentWillMount() {
     d3.json(process.env.PUBLIC_URL + '/songs.json', songs => {
+      songs = _.sortBy(songs, 'name');
       this.setState({songs});
     });
   }
