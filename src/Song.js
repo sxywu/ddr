@@ -35,6 +35,15 @@ class Song extends Component {
     this.setState({directions});
   }
 
+  filterDifficulty(difficulty) {
+    var difficulties = this.state.difficulties;
+    if (_.includes(difficulties, difficulty)) {
+      difficulties = _.without(difficulties, difficulty);
+    } else {
+      difficulties.push(difficulty);
+    }
+    this.setState({difficulties});
+  }
 
   renderArrows() {
     var size = 12;
@@ -85,11 +94,11 @@ class Song extends Component {
         display: 'inline-block',
         lineHeight: size,
         verticalAlign: 'middle',
-        width: dotSize * multiple,
-        height: dotSize * multiple,
-        borderRadius: dotSize * multiple,
+        width: includes ? dotSize * multiple : dotSize,
+        height: includes ? dotSize * multiple : dotSize,
+        borderRadius: includes ? dotSize * multiple : dotSize,
         backgroundColor: includes ? color : '#fff',
-        border: includes? '#fff' : color,
+        border: includes? 'none' : '2px solid' + color,
         margin: 5,
       };
       return (
@@ -119,11 +128,13 @@ class Song extends Component {
       height: 350,
     };
 
-    var levels = _.map(this.state.levels, level => {
-      return Object.assign({}, level, {
-        steps: _.filter(level.steps, step => _.includes(this.state.directions, step[1][0])),
-      });
-    });
+    var levels = _.chain(this.state.levels)
+      .filter(level => _.includes(this.state.difficulties, level.difficulty))
+      .map(level => {
+        return Object.assign({}, level, {
+          steps: _.filter(level.steps, step => _.includes(this.state.directions, step[1][0])),
+        });
+      }).value();
 
     return (
       <div className="Song" style={style}>
