@@ -29,7 +29,7 @@ class App extends Component {
   }
 
   componentWillMount() {
-    d3.json(process.env.PUBLIC_URL + 'songs.json', songs => {
+    d3.json(process.env.PUBLIC_URL + '/songs.json', songs => {
       this.setState({songs});
     });
   }
