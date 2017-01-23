@@ -10,7 +10,7 @@ class Song extends Component {
     super(props);
     this.state = {
       levels: [],
-      difficulty: ['Basic', 'Trick', 'Maniac'],
+      difficulties: ['Basic', 'Trick', 'Maniac'],
       directions: ['U', 'R', 'D', 'L'],
     };
   }
@@ -37,13 +37,13 @@ class Song extends Component {
 
 
   renderArrows() {
-    var size = 14;
+    var size = 12;
     return _.map([['←', 'L'], ['↑', 'U'], ['→', 'R'], ['↓', 'D']], data => {
       var [arrow, direction] = data;
       var includes = _.includes(this.state.directions, direction);
       var color = 'rgb(' + this.props.colors(direction) + ')';
 
-      var arrowStyle = {
+      var style = {
         display: 'inline-block',
         width: size,
         height: size,
@@ -58,9 +58,45 @@ class Song extends Component {
         cursor: 'pointer',
       };
       return (
-        <span className='header' style={arrowStyle}
+        <span className='header' style={style}
           onClick={this.filterDirection.bind(this, direction)}>
           {arrow}
+        </span>
+      );
+    });
+  }
+
+  renderDifficulties() {
+    var size = 12;
+    var dotSize = 3;
+    return _.map([['3', 'Basic'], ['2', 'Trick'], ['1', 'Maniac']], data => {
+      var [multiple, difficulty] = data;
+      var includes = _.includes(this.state.difficulties, difficulty);
+      var color = '#999';
+
+      var style = {
+        fontWeight: 800,
+        fontSize: size,
+        padding: 5,
+        margin: 5,
+        cursor: 'pointer',
+      };
+      var dotStyle = {
+        display: 'inline-block',
+        lineHeight: size,
+        verticalAlign: 'middle',
+        width: dotSize * multiple,
+        height: dotSize * multiple,
+        borderRadius: dotSize * multiple,
+        backgroundColor: includes ? color : '#fff',
+        border: includes? '#fff' : color,
+        margin: 5,
+      };
+      return (
+        <span className='header' style={style}
+          onClick={this.filterDifficulty.bind(this, difficulty)}>
+          <span style={dotStyle} />
+          {difficulty}
         </span>
       );
     });
@@ -94,9 +130,8 @@ class Song extends Component {
         <div style={headerStyle}>
           <h3>{this.props.data.name}</h3>
           <p>{this.props.data.artist}</p>
-        </div>
-        <div>
-          {this.renderArrows()}
+          <p>{this.renderArrows()}</p>
+          <p>{this.renderDifficulties()}</p>
         </div>
         <Visualization {...vizStyle} {...this.props} data={levels} />
       </div>
