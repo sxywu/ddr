@@ -12,6 +12,7 @@ class Song extends Component {
       levels: [],
       difficulties: ['Basic', 'Trick', 'Maniac'],
       directions: ['U', 'R', 'D', 'L'],
+      expanded: false,
     };
   }
 
@@ -45,6 +46,11 @@ class Song extends Component {
     this.setState({difficulties});
   }
 
+  updateExpand() {
+    var expanded = !this.state.expanded;
+    this.setState({expanded});
+  }
+
   renderArrows(levels) {
     var size = 12;
     return _.map([['←', 'L'], ['↑', 'U'], ['→', 'R'], ['↓', 'D']], data => {
@@ -67,7 +73,7 @@ class Song extends Component {
         height: size,
         borderRadius: size,
         backgroundColor: includes ? color : '#fff',
-        color: includes? '#fff' : color,
+        color: includes ? '#fff' : color,
         fontSize: size * 0.75,
         fontWeight: 800,
         padding: 5,
@@ -89,7 +95,7 @@ class Song extends Component {
     return _.map([['3', 'Basic'], ['2', 'Trick'], ['1', 'Maniac']], data => {
       var [multiple, difficulty] = data;
       var includes = _.includes(this.state.difficulties, difficulty);
-      var color = '#999';
+      var color = '#ccc';
       var count = _.find(levels, level => level.difficulty === difficulty);
       count = count ? count.steps.length : 0;
 
@@ -99,14 +105,14 @@ class Song extends Component {
         cursor: 'pointer',
       };
       var dotStyle = {
-        display: 'inline-block',
-        lineHeight: size,
+        lineHeight: size + 'px',
         verticalAlign: 'middle',
+        display: 'inline-block',
         width: includes ? dotSize * multiple : dotSize,
         height: includes ? dotSize * multiple : dotSize,
         borderRadius: includes ? dotSize * multiple : dotSize,
         backgroundColor: includes ? color : '#fff',
-        border: includes? 'none' : '2px solid' + color,
+        border: includes ? 'none' : '2px solid ' + color,
         margin: 5,
       };
       var headerStyle = {
@@ -140,6 +146,22 @@ class Song extends Component {
       width: 350,
       height: 350,
     };
+    var buttonSize = 14;
+    var expandStyle = {
+      verticalAlign: 'top',
+      lineHeight: buttonSize + 'px',
+      width: buttonSize,
+      height: buttonSize,
+      borderRadius: buttonSize,
+      backgroundColor: this.state.expanded ? '#ccc' : '#fff',
+      color: this.state.expanded ? '#fff' : '#ccc',
+      border: this.state.expanded ? 'none' : '2px solid #ccc',
+      fontSize: buttonSize * 0.75,
+      fontWeight: 800,
+      padding: 5,
+      margin: 'auto',
+      cursor: 'pointer',
+    };
 
     var levels = _.chain(this.state.levels)
       .filter(level => _.includes(this.state.difficulties, level.difficulty))
@@ -149,15 +171,25 @@ class Song extends Component {
         });
       }).value();
 
+    if (this.state.expanded) {
+      vizStyle = {
+        width: 760,
+        height: 760,
+      };
+    }
+
     return (
-      <div className="Song" style={style}>
+      <div style={style}>
         <div style={headerStyle}>
+          <div style={expandStyle} onClick={this.updateExpand.bind(this)}>
+            ⤢
+          </div>
           <h3>{this.props.data.name}</h3>
           <p>{this.props.data.artist}</p>
           <p>{this.renderArrows(levels)}</p>
           <p>{this.renderDifficulties(levels)}</p>
         </div>
-        <Visualization {...vizStyle} {...this.props} data={levels} />
+        <Visualization {...vizStyle} {...this.props} {...this.state} data={levels} />
       </div>
     );
   }
